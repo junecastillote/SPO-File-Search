@@ -66,6 +66,8 @@ This script connects to each specified site, gets the existing files recursively
     [<CommonParameters>]
 ```
 
+![Using an Administrator Credential](docs/images/param_set_1.png)
+
 ### Using App-Only Authentication
 
 ```powershell
@@ -80,6 +82,8 @@ This script connects to each specified site, gets the existing files recursively
     [-Quiet]
     [<CommonParameters>]
 ```
+
+![Using App-Only Authentication](docs/images/param_set_2.png)
 
 ## Parameters
 
