@@ -7,3 +7,4 @@ test*
 *.pfx
 *.cer
 *.xml
+RegisterApp.ps1
