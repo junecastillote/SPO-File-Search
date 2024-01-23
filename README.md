@@ -16,8 +16,8 @@ Administrators may be asked to search SharePoint and OneDrive sites for various 
 - [Script Usage Examples](#script-usage-examples)
   - [Example 1: Find Files from a Site using Admin Credentials](#example-1-find-files-from-a-site-using-admin-credentials)
   - [Example 2: Find Files from a Site using App-Only Authentication with Certificate](#example-2-find-files-from-a-site-using-app-only-authentication-with-certificate)
-  - [Example 3: Find Files from All SharePoint Sites Only](#example-3-find-files-from-all-sharepoint-sites-only)
-  - [Example 4: Find Files from All OneDrive Site](#example-4-find-files-from-all-onedrive-site)
+  - [Example 3: Find Files from All SharePoint Sites Only and Write the Results to a Custom CSV File Path](#example-3-find-files-from-all-sharepoint-sites-only-and-write-the-results-to-a-custom-csv-file-path)
+  - [Example 4: Find Files from All OneDrive Sites Only](#example-4-find-files-from-all-onedrive-sites-only)
 
 ## Other alternatives exists?
 
@@ -188,6 +188,49 @@ $results = .\Find-FileInSite.ps1 @splat
 
 ![Example 2](docs/images/example2.png)
 
-### Example 3: Find Files from All SharePoint Sites Only
+### Example 3: Find Files from All SharePoint Sites Only and Write the Results to a Custom CSV File Path
 
-### Example 4: Find Files from All OneDrive Site
+```PowerShell
+# Must be connected to PnP PowerShell
+
+# Get all SharePoint Sites
+$urlCollection = (Get-PnPTenantSite).Url
+
+$splat = @{
+    SiteURL      = $urlCollection
+    SearchString = "*.docx", "*.pdf", "*.xml", "app.yaml", "*.pptx"
+    Tenant       = "poshlab1.onmicrosoft.com"
+    ClientId     = "4b92dbfc-7b32-4824-8225-415df97a1ecf"
+    Thumbprint   = "41C82D1E0EE6B423759387B0623FD632E2CD70C6"
+    OutputFile   = "C:\temp\spo_search_results.csv"
+}
+
+.\Find-FileInSite.ps1 @splat
+```
+
+![Example 3](docs/images/example3.png)
+
+**Resulting Custom CSV File**
+
+![Custom CSV File Result](docs/images/custom_csv_file.png)
+
+### Example 4: Find Files from All OneDrive Sites Only
+
+```PowerShell
+
+# Must be connected to PnP PowerShell
+
+# Get all OneDrive Sites
+$urlCollection = (Get-PnPTenantSite -IncludeOneDriveSites -Filter "Url -like '-my.sharepoint.com/personal/'").Url
+
+$splat = @{
+    SiteURL      = $urlCollection
+    SearchString = "*.docx", "*.pdf", "*.xml", "app.yaml", "*.pptx"
+    Tenant       = "poshlab1.onmicrosoft.com"
+    ClientId     = "4b92dbfc-7b32-4824-8225-415df97a1ecf"
+    Thumbprint   = "41C82D1E0EE6B423759387B0623FD632E2CD70C6"
+    ReturnResult = $true
+}
+
+$results = .\Find-FileInSite.ps1 @splat
+```
