@@ -13,6 +13,11 @@ Administrators may be asked to search SharePoint and OneDrive sites for various 
   - [Using an Administrator Credential](#using-an-administrator-credential)
   - [Using App-Only Authentication](#using-app-only-authentication)
 - [Parameters](#parameters)
+- [Script Usage Examples](#script-usage-examples)
+  - [Example 1: Find Files from a Site using Admin Credentials](#example-1-find-files-from-a-site-using-admin-credentials)
+  - [Example 2: Find Files from a Site using App-Only Authentication with Certificate](#example-2-find-files-from-a-site-using-app-only-authentication-with-certificate)
+  - [Example 3: Find Files from All SharePoint Sites Only](#example-3-find-files-from-all-sharepoint-sites-only)
+  - [Example 4: Find Files from All OneDrive Site](#example-4-find-files-from-all-onedrive-site)
 
 ## Other alternatives exists?
 
@@ -138,3 +143,47 @@ Suppresses the informational output on the screen. The output will still be writ
 This cmdlet supports the common parameters: `Verbose`, `Debug`, `ErrorAction`, `ErrorVariable`, `WarningAction`, `WarningVariable`, `OutBuffer`, `PipelineVariable`, and `OutVariable`.
 
 For more information, see [about_CommonParameters](https://go.microsoft.com/fwlink/?LinkID=113216).
+
+## Script Usage Examples
+
+### Example 1: Find Files from a Site using Admin Credentials
+
+```PowerShell
+$credential = Get-Credential
+
+$results = .\Find-FileInSite.ps1 `
+    -SiteURL "https://poshlab1.sharepoint.com/sites/ITOps" `
+    -Credential $credential `
+    -SearchString "app.yaml" `
+    -ReturnResult
+```
+
+![Example 1](docs/images/example1.png)
+
+### Example 2: Find Files from a Site using App-Only Authentication with Certificate
+
+In this example, the corresponding certificate is present in the personal certificate store with the thumbprint of `41C82D1E0EE6B423759387B0623FD632E2CD70C6`.
+
+![Certificate Store](docs/images/certstore.png)
+
+```PowerShell
+$splat = @{
+    SiteURL      = @(
+        "https://poshlab1.sharepoint.com/sites/ITOps",
+        "https://poshlab1-my.sharepoint.com/personal/june_poshlab_xyz"
+    )
+    SearchString = "*.docx", "*.pdf", "*.xml", "app.yaml"
+    Tenant       = "poshlab1.onmicrosoft.com"
+    ClientId     = "4b92dbfc-7b32-4824-8225-415df97a1ecf"
+    Thumbprint   = "41C82D1E0EE6B423759387B0623FD632E2CD70C6"
+    ReturnResult = $true
+}
+
+$results = .\Find-FileInSite.ps1 @splat
+```
+
+![Example 2](docs/images/example2.png)
+
+### Example 3: Find Files from All SharePoint Sites Only
+
+### Example 4: Find Files from All OneDrive Site
