@@ -13,16 +13,6 @@ Administrators may be asked to search SharePoint and OneDrive sites for various 
   - [Using an Administrator Credential](#using-an-administrator-credential)
   - [Using App-Only Authentication](#using-app-only-authentication)
 - [Parameters](#parameters)
-  - [`-SiteURL <String[]>`](#-siteurl-string)
-  - [`-Credential <PSCredential>`](#-credential-pscredential)
-  - [`-ClientId <String>`](#-clientid-string)
-  - [`-Tenant <String>`](#-tenant-string)
-  - [`-Thumbprint <String>`](#-thumbprint-string)
-  - [`-SearchString <String[]>`](#-searchstring-string)
-  - [`-ReturnResult [<SwitchParameter>]`](#-returnresult-switchparameter)
-  - [`-OutputFile <String>`](#-outputfile-string)
-  - [`-Quiet [<SwitchParameter>]`](#-quiet-switchparameter)
-  - [`<CommonParameters>`](#commonparameters)
 
 ## Other alternatives exists?
 
@@ -88,7 +78,7 @@ This script connects to each specified site, gets the existing files recursively
 
 ## Parameters
 
-### `-SiteURL <String[]>`
+**`-SiteURL <String[]>`**
 
 The site URL you want to search.
 
@@ -107,43 +97,43 @@ Or a collection:
 )
 ```
 
-### `-Credential <PSCredential>`
+**`-Credential <PSCredential>`**
 
 The PSCredential object of the account used to connect to the SharePoint or OneDrive site.
 
 This credential must be non-MFA enabled and has Site Administrator or Owner access to the site.
 
-### `-ClientId <String>`
+**`-ClientId <String>`**
 
 The client ID of application ID of the Azure AD app registration, if using app-only authentication instead of a credential.
 
-### `-Tenant <String>`
+**`-Tenant <String>`**
 
 The SharePoint Online tenant ID, such as `contoso.sharepoint.com`, if using app-only authentication instead of a credential.
 
-### `-Thumbprint <String>`
+**`-Thumbprint <String>`**
 
 The public key certificate thumbprint associated with the Azure AD app registration, if using app-only authentication instead of a credential.
 
 The corresponding private certificate must be present in your personal certificate store `[cert:\CurrentUser\My\<thumbprint>]` for this to work.
 
-### `-SearchString <String[]>`
+**`-SearchString <String[]>`**
 
 One of more specific file name or pattern to search. For example, `"*.pdf","filename.ext","file*.00*"`
 
-### `-ReturnResult [<SwitchParameter>]`
+**`-ReturnResult [<SwitchParameter>]`**
 
 Indicates whether the search results will be returned.
 
-### `-OutputFile <String>`
+**`-OutputFile <String>`**
 
 The custom CSV file path to write the search results, if any. If not specified, the default output file path will be: `.\search\SPO_File_Search_yyyy-MM-dd_hh-mm-ss_tt_username.csv`
 
-### `-Quiet [<SwitchParameter>]`
+**`-Quiet [<SwitchParameter>]`**
 
 Suppresses the informational output on the screen. The output will still be written to a log file with the same filename as the output filename with a `.LOG` extension.
 
-### `<CommonParameters>`
+**`<CommonParameters>`**
 
 This cmdlet supports the common parameters: `Verbose`, `Debug`, `ErrorAction`, `ErrorVariable`, `WarningAction`, `WarningVariable`, `OutBuffer`, `PipelineVariable`, and `OutVariable`.
 
