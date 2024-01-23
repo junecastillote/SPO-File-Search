@@ -16,9 +16,9 @@
 
 .TAGS
 
-.LICENSEURI
+.LICENSEURI https://raw.githubusercontent.com/junecastillote/SPO-File-Search/main/LICENSE
 
-.PROJECTURI
+.PROJECTURI https://github.com/junecastillote/SPO-File-Search
 
 .ICONURI
 
@@ -129,7 +129,10 @@ $splat = @{
 
 [CmdletBinding(DefaultParameterSetName = 'Credential+SearchString')]
 param (
-    [Parameter(Mandatory, Position = 0)]
+    [Parameter(
+        Mandatory,
+        Position = 0
+    )]
     [String[]]
     $SiteURL,
 
