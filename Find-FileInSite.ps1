@@ -30,8 +30,6 @@
 
 .RELEASENOTES
 
-
-
 .PRIVATEDATA
 
 #>
@@ -97,9 +95,10 @@ Suppresses the informational output on the screen. The output will still be writ
 .NOTES
     * This script only works in PowerShell Core (7.2+), which is a requirement of the PnP.PowerShell module.
     * This script has only been tested on Windows.
+    * For changes, refer to the release notes @ https://github.com/junecastillote/SPO-File-Search/blob/main/release_notes.md
 
 .LINK
-https://github.com/junecastillote/SPO-File-Search/tree/main/README.md
+https://github.com/junecastillote/SPO-File-Search/blob/main/README.md
 
 .OUTPUTS
 
