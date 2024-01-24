@@ -161,7 +161,7 @@ param (
     [String]
     $Thumbprint,
 
-    [Parameter( Mandatory, ParameterSetName = 'Interactive+SearchString' )]
+    [Parameter( ParameterSetName = 'Interactive+SearchString' )]
     [Switch]
     $Interactive,
 
