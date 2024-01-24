@@ -1,0 +1,10 @@
+demo*
+test*
+*.csv
+*.yaml
+*.csv
+*.log
+*.pfx
+*.cer
+*.xml
+RegisterApp.ps1
