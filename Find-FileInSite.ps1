@@ -30,8 +30,11 @@
 
 .RELEASENOTES
 
-* 0.1 - Initial
-
+* 0.1
+      - Initial
+* 0.2
+      - Added the Interactive login switch
+      - Changed default parameter set to Interactive+SearchString
 
 .PRIVATEDATA
 
@@ -64,6 +67,10 @@ The SharePoint Online tenant ID, such as contoso.sharepoint.com, if using app-on
 
 The public key certificate thumbprint associated with the Azure AD app registration, if using app-only authentication instead of a credential.
 The corresponding private certificate must be present in your personal certificate store [cert:\CurrentUser\My\<thumbprint>] for this to work.
+
+.PARAMETER Interactive
+
+Switch to trigger interactive login. Note that this switch will prompt you to log in to each site to search.
 
 .PARAMETER SearchString
 
@@ -129,7 +136,7 @@ $splat = @{
 
 #>
 
-[CmdletBinding(DefaultParameterSetName = 'Credential+SearchString')]
+[CmdletBinding(DefaultParameterSetName = 'Interactive+SearchString')]
 param (
     [Parameter(
         Mandatory,
@@ -147,16 +154,20 @@ param (
     $ClientId,
 
     [Parameter( Mandatory, ParameterSetName = 'Certificate+SearchString' )]
-
     [String]
     $Tenant,
-    [Parameter( Mandatory, ParameterSetName = 'Certificate+SearchString' )]
 
+    [Parameter( Mandatory, ParameterSetName = 'Certificate+SearchString' )]
     [String]
     $Thumbprint,
 
-    [Parameter( Mandatory, ParameterSetName = 'Credential+SearchString' )]
-    [Parameter( Mandatory, ParameterSetName = 'Certificate+SearchString' )]
+    [Parameter( ParameterSetName = 'Interactive+SearchString' )]
+    [Switch]
+    $Interactive,
+
+    # [Parameter( Mandatory, ParameterSetName = 'Credential+SearchString' )]
+    # [Parameter( Mandatory, ParameterSetName = 'Certificate+SearchString' )]
+    [Parameter( Mandatory )]
     [String[]]
     $SearchString,
 
@@ -323,9 +334,15 @@ process {
                 Connect-PnPOnline -Url $url -Credentials $Credential -ErrorAction Stop
             }
 
+            ## If using interactive authentication (non-MFA/MFA)
+            if ($PSCmdlet.ParameterSetName -like 'Interactive*') {
+                Say "  -> Start interactive login to site." Yellow
+                Connect-PnPOnline -Url $url -Interactive -ErrorAction Stop
+            }
+
             ## Get tenant URLs (once)
             if (!$tenantUrls) {
-                Say "  -> Getting tenant URLs" Yellow
+                # Say "  -> Getting tenant URLs" Yellow
                 $tenantUrls = Get-PnPTenantInstance
             }
 
