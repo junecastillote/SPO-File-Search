@@ -161,12 +161,10 @@ param (
     [String]
     $Thumbprint,
 
-    [Parameter( ParameterSetName = 'Interactive+SearchString' )]
+    [Parameter( Mandatory, ParameterSetName = 'Interactive+SearchString' )]
     [Switch]
     $Interactive,
 
-    # [Parameter( Mandatory, ParameterSetName = 'Credential+SearchString' )]
-    # [Parameter( Mandatory, ParameterSetName = 'Certificate+SearchString' )]
     [Parameter( Mandatory )]
     [String[]]
     $SearchString,
