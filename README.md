@@ -116,7 +116,7 @@ This script connects to each specified site, gets the existing files recursively
     [<CommonParameters>]
 ```
 
-![Using App-Only Authentication](docs/images/param_set_3.png)
+![Using Interactive Authentication](docs/images/param_set_3.png)
 
 ## Parameters
 
