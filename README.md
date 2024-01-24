@@ -21,6 +21,7 @@ Administrators may be asked to search SharePoint and OneDrive sites for various 
 - [Appendix](#appendix)
   - [Register an Azure AD App using the Register-PnPAzureADApp Cmdlet for App-Only Authentication](#register-an-azure-ad-app-using-the-register-pnpazureadapp-cmdlet-for-app-only-authentication)
     - [New App + New Self-Signed Certificate](#new-app--new-self-signed-certificate)
+- [Q\&A](#qa)
 
 ## Other alternatives exists?
 
@@ -50,9 +51,13 @@ This script connects to each specified site, gets the existing files recursively
 
 - A non-MFA credential with a SharePoint Admin role and has full access to all SharePoint and OneDrive sites.
 
+> **Note**: An alternative is to create a [*Trusted Location-Based Conditional Access Policy*] that bypasses the MFA requirement of the administrator account.
+
 #### OPTION 2: App-Only Credential with Certificate (Recommended)
 
 - Register an Azure AD App using the [Register-PnPAzureADApp](https://pnp.github.io/powershell/cmdlets/Register-PnPAzureADApp.html) cmdlet.
+
+> Refer to Appendix: [Register an Azure AD App using the Register-PnPAzureADApp Cmdlet for App-Only Authentication](#register-an-azure-ad-app-using-the-register-pnpazureadapp-cmdlet-for-app-only-authentication)
 
 ## Syntax
 
@@ -113,7 +118,10 @@ Or a collection:
 
 The PSCredential object of the account used to connect to the SharePoint or OneDrive site.
 
-This credential must be non-MFA enabled and has Site Administrator or Owner access to the site.
+This credential must be:
+
+- Non-MFA enabled SharePoint Administrator account
+- Has Site Administrator or Owner access to all sites (or specific sites to search.)
 
 **`-ClientId <String>`**
 
@@ -295,3 +303,44 @@ Get-PnPTenantInstance
 ```
 
 ![PnP Auth](docs/images/pnp_auth.png)
+
+## Q&A
+
+**Question: Can I export the results to a CSV file?**
+> *Yes. Ensure to use the `-ReturnResults` switch and pipe to the `Export-Csv` cmdlet.*
+>
+> *The script automatically creates a CSV file containing the search results. The default location is under the `.\search\` subfolder.*
+>
+>*You can also specify a custom CSV file to use with the `-OutputFile <filepath>` parameter.*
+
+**Question: If I do not use the `-ReturnResult` switch, how can I see the search results?**
+> *The script automatically creates a CSV file containing the search results. The default location is under the `.\search\` subfolder.*
+>
+> *You can also specify a custom CSV file to use with the `-OutputFile <filepath>` parameter.*
+
+**Question: Does the script also search the default SharePoint Tenant URLs?**
+> *No, it doesn't. The script deliberately ignores the tenant URLs such as the following.*
+>
+> ```text
+> MySiteHostUrl  : https://*-my.sharepoint.com/
+> PortalUrl      : https://*.sharepoint.com/
+> RootSiteUrl    : https://*.sharepoint.com/
+> TenantAdminUrl : https://*-admin.sharepoint.com/
+> ```
+>
+> It also ignores the URLs matching these patterns:
+>
+> `".*-my\.sharepoint\.com/$|.*\.sharepoint\.com/$|.*\.sharepoint\.com/search$|.*\.sharepoint\.com/portals/hub$|.*\.sharepoint\.com/sites/appcatalog$"`
+
+**Question: Does the script also search the default system libraries?**
+> *No, it doesn't search the default system libraries such as the following:
+> `'Form Templates', 'Pages', 'Preservation Hold Library', 'Site Assets', 'Site Pages', 'Images',
+        'Site Collection Documents', 'Site Collection Images', 'Style Library'`*
+
+**Question: What happens if the administrator account doesn't have site administrator or owner access to the site?**
+> *The search operation will fail with an `unauthorized` error. This is why it is recommended to use App-Only authentication instead of an administrator credential.*
+>
+> *Refer to Appendix: [Register an Azure AD App using the Register-PnPAzureADApp Cmdlet for App-Only Authentication](#register-an-azure-ad-app-using-the-register-pnpazureadapp-cmdlet-for-app-only-authentication)*
+
+**Question: I want to use app-only authentication but I don't have the Global Administrator role to grant application permissions required?**
+> Register the Azure AD application (if you have the right role) and ask your Global Administrator to grant the consent separately.
