@@ -18,6 +18,9 @@ Administrators may be asked to search SharePoint and OneDrive sites for various 
   - [Example 2: Find Files from a Site using App-Only Authentication with Certificate](#example-2-find-files-from-a-site-using-app-only-authentication-with-certificate)
   - [Example 3: Find Files from All SharePoint Sites Only and Write the Results to a Custom CSV File Path](#example-3-find-files-from-all-sharepoint-sites-only-and-write-the-results-to-a-custom-csv-file-path)
   - [Example 4: Find Files from All OneDrive Sites Only](#example-4-find-files-from-all-onedrive-sites-only)
+- [Appendix](#appendix)
+  - [Register an Azure AD App using the Register-PnPAzureADApp Cmdlet for App-Only Authentication](#register-an-azure-ad-app-using-the-register-pnpazureadapp-cmdlet-for-app-only-authentication)
+    - [New App + New Self-Signed Certificate](#new-app--new-self-signed-certificate)
 
 ## Other alternatives exists?
 
@@ -210,7 +213,7 @@ $splat = @{
 
 ![Example 3](docs/images/example3.png)
 
-**Resulting Custom CSV File**
+Resulting Custom CSV File
 
 ![Custom CSV File Result](docs/images/custom_csv_file.png)
 
@@ -234,3 +237,61 @@ $splat = @{
 
 $results = .\Find-FileInSite.ps1 @splat
 ```
+
+## Appendix
+
+### Register an Azure AD App using the Register-PnPAzureADApp Cmdlet for App-Only Authentication
+
+> NOTE: This action requires you to log in using an account with write access to Azure AD.
+
+#### New App + New Self-Signed Certificate
+
+Run the following commands in PowerShell. Make sure to replace the appropriate values as needed.
+
+```powershell
+# Import the module
+Import-Module PnP.PowerShell
+
+# Compose the Application properties
+$splat = @{
+    ApplicationName     = 'SharePoint File Search App'
+    CertificatePassword = ('Reawake2#Conform#Throttle' | ConvertTo-SecureString -AsPlainText -Force)
+    OutPath             = (Get-Location).Path
+    Tenant              = 'poshlab1.onmicrosoft.com'
+    Store               = 'CurrentUser'
+    Interactive         = $true
+}
+
+# Register the application
+Register-PnPAzureADApp @splat -OutVariable appReg
+```
+
+![Register New App](docs/images/new_app_new_cert.png)
+
+Log in with your administrator credentials when prompted.
+
+![Log in](docs/images/login.png)
+
+Accept the permissions request.
+
+> **Note that only a Global Administrator can accept or grant consent on behalf of the organization. If not, a Global Administrator can grant the consent from the Applications Registration page in Azure AD (Entra ID)**
+
+![Grant Permission](docs/images/grant_permission.png)
+
+Once registered, you'll receive the following information.
+
+![New App Details](docs/images/new_app_details.png)
+
+Finally, test if you can login to PnP PowerShell using the new Azure AD app.
+
+```powershell
+Connect-PnPOnline `
+    -ClientId $appreg[0].'AzureAppId/ClientId' `
+    -Tenant 'poshlab1.onmicrosoft.com' `
+    -Thumbprint $appreg[0].'Certificate Thumbprint' `
+    -Url "https://poshlab1-admin.sharepoint.com"
+
+Get-PnPTenantInstance
+```
+
+![PnP Auth](docs/images/pnp_auth.png)
