@@ -30,7 +30,7 @@
 
 .RELEASENOTES
 
-* 0.1 - initial, dev version
+* 0.1 - Initial
 
 
 .PRIVATEDATA
@@ -90,7 +90,9 @@ Suppresses the informational output on the screen. The output will still be writ
 .NOTES
     * This script only works in PowerShell Core (7.2+), which is a requirement of the PnP.PowerShell module.
     * This script has only been tested on Windows.
+
 .LINK
+https://github.com/junecastillote/SPO-File-Search/tree/main/README.md
 
 .OUTPUTS
 
@@ -388,8 +390,6 @@ process {
 
                 $output = $searchResult | Select-Object SiteUrl, SiteName, SiteType, OwnerName, OwnerEmail, OwnerType, @{
                     n = "ParentPath"; e = {
-                        # $pathSplit = ($_.ServerRelativeUrl -split '/')
-                        # "$($pathSplit[3..($pathSplit.Count - 2)] -join "/")"
                         "/$((($_.ServerRelativeUrl -split '/') | Select-Object -Skip 3 | Select-Object -SkipLast 1) -join "/")/"
                     }
                 },
