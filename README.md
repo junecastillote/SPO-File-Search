@@ -78,6 +78,7 @@ This script connects to each specified site, gets the existing files recursively
     [-SiteURL] <String[]>
     -Credential <PSCredential>
     -SearchString <String[]>
+    [-Exclude <string[]>]
     [-ReturnResult]
     [-OutputFile <String>]
     [-Quiet]
@@ -95,6 +96,7 @@ This script connects to each specified site, gets the existing files recursively
     -Tenant <String>
     -Thumbprint <String>
     -SearchString <String[]>
+    [-Exclude <string[]>]
     [-ReturnResult]
     [-OutputFile <String>]
     [-Quiet]
@@ -109,6 +111,7 @@ This script connects to each specified site, gets the existing files recursively
 .\Find-FileInSite.ps1
     [-SiteURL] <String[]>
     -SearchString <String[]>
+    [-Exclude <string[]>]
     [-Interactive]
     [-ReturnResult]
     [-OutputFile <String>]
@@ -171,6 +174,10 @@ Note that this switch will prompt you to log in to each site to search and is no
 **`-SearchString <String[]>`**
 
 One of more specific file name or pattern to search. For example, `"*.pdf","filename.ext","file*.00*"`
+
+**`-Exclude <String[]>`**
+
+One of more specific file name or pattern to exclude. For example, `"*.aspx"` excludes files with the `aspx` extension.
 
 **`-ReturnResult [<SwitchParameter>]`**
 
@@ -361,7 +368,7 @@ Get-PnPTenantInstance
 
 ### Can I export the search results to a CSV file?
 
-> *Yes. Use the `-ReturnResults` switch and pipe to the `Export-Csv` cmdlet.*
+> *Yes. Use the `-ReturnResult` switch and pipe to the `Export-Csv` cmdlet.*
 >
 > *The script automatically creates a CSV file containing the search results. The default location is under the `.\search\` subfolder.*
 >
