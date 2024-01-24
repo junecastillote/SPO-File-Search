@@ -4,7 +4,7 @@
 
 <#PSScriptInfo
 
-.VERSION 0.2
+.VERSION 0.3
 
 .GUID 8197ffd7-8561-4c67-9602-32a69d59b337
 
@@ -30,11 +30,7 @@
 
 .RELEASENOTES
 
-* 0.1
-      - Initial
-* 0.2
-      - Added the Interactive login switch
-      - Changed default parameter set to Interactive+SearchString
+
 
 .PRIVATEDATA
 
@@ -75,6 +71,10 @@ Switch to trigger interactive login. Note that this switch will prompt you to lo
 .PARAMETER SearchString
 
 One of more specific file name or pattern to search. For example, "*.pdf","filename.ext","file*.00*"
+
+.PARAMETER Exclude
+
+One of more specific file name or pattern to exclude. For example, "*.aspx" excludes files with the aspx extension.
 
 .PARAMETER ReturnResult
 
@@ -166,8 +166,14 @@ param (
     $Interactive,
 
     [Parameter( Mandatory )]
+    [ValidateNotNullOrEmpty()]
     [String[]]
     $SearchString,
+
+    [Parameter( )]
+    [ValidateNotNullOrEmpty()]
+    [String[]]
+    $Exclude,
 
     [Parameter()]
     [Switch]
@@ -308,8 +314,33 @@ begin {
         }
     ) -join '|'
 
+    if ($Exclude) {
+        $excludePattern = (
+            $Exclude | ForEach-Object {
+                if ($_ -match '\*\.\w+') {
+                    # if the search string is *.<word>
+                    "$([regex]::Escape($_) -replace '\\\*', '.*')$"
+                }
+                elseif ($_ -match '\*') {
+                    # if the search string contains *
+                    "$([regex]::Escape($_) -replace '\\\*', '.*')$"
+                }
+                elseif ($_ -notmatch '\*') {
+                    # if the search string does not contain *
+                    "$([regex]::Escape($_))$"
+                }
+                else {
+                    $_
+                }
+            }
+        ) -join '|'
+    }
+
     Say "SPO / ODB Sites to search: $($SiteURL.Count)" Yellow
     Say "Search Filter: $($filterPattern)" Yellow
+    if ($excludePattern) {
+        Say "Exclude Filter: $($excludePattern)" Yellow
+    }
 
     # Tenant URLs
     $tenantUrls = $null
@@ -381,44 +412,52 @@ process {
                     $files = Get-PnPFolderItem -FolderSiteRelativeUrl $($library.Leaf) -ItemType File -Recursive
                     $searchResult.AddRange(
                         @(
-                            $files | Where-Object { $_.Name -match $filterPattern }
+                            ## Ignore if the ServerRelativeUrl is like */Forms/file.ext
+
+                            if ($Exclude) {
+                                $files | Where-Object { $_.Name -match $filterPattern -and $(($_.ServerRelativeUrl -split '/')[-2]) -ne "Forms" -and $_.Name -notmatch $excludePattern }
+                            }
+
+                            if (!$Exclude) {
+                                $files | Where-Object { $_.Name -match $filterPattern -and $(($_.ServerRelativeUrl -split '/')[-2]) -ne "Forms" }
+                            }
                         )
                     )
-                    Say "      -> Items: $($searchResult.Count)" Green
-                }
-            }
 
-            if ($searchResult) {
-                $searchResult | Add-Member -Name SiteUrl -MemberType NoteProperty -Value $site.Url
-                $searchResult | Add-Member -Name SiteName -MemberType NoteProperty -Value $site.Title
-                $searchResult | Add-Member -Name SiteType -MemberType NoteProperty -Value $siteType
-                $searchResult | Add-Member -Name OwnerName -MemberType NoteProperty -Value $site.OwnerName
-                $searchResult | Add-Member -Name OwnerEmail -MemberType NoteProperty -Value $site.OwnerEmail
-                $searchResult | Add-Member -Name OwnerType -MemberType NoteProperty -Value $(
-                    if ($site.GroupId -ne '00000000-0000-0000-0000-000000000000') {
-                        'Group'
+                    if ($searchResult.Count -gt 0) {
+                        Say "      -> Items: $($searchResult.Count)" Green
+                        $searchResult | Add-Member -Name SiteUrl -MemberType NoteProperty -Value $site.Url
+                        $searchResult | Add-Member -Name SiteName -MemberType NoteProperty -Value $site.Title
+                        $searchResult | Add-Member -Name SiteType -MemberType NoteProperty -Value $siteType
+                        $searchResult | Add-Member -Name OwnerName -MemberType NoteProperty -Value $site.OwnerName
+                        $searchResult | Add-Member -Name OwnerEmail -MemberType NoteProperty -Value $site.OwnerEmail
+                        $searchResult | Add-Member -Name OwnerType -MemberType NoteProperty -Value $(
+                            if ($site.GroupId -ne '00000000-0000-0000-0000-000000000000') {
+                                'Group'
+                            }
+                            else {
+                                'User'
+                            }
+                        )
+
+                        $output = $searchResult | Select-Object SiteUrl, SiteName, SiteType, OwnerName, OwnerEmail, OwnerType, @{
+                            n = "ParentPath"; e = {
+                                "/$((($_.ServerRelativeUrl -split '/') | Select-Object -Skip 3 | Select-Object -SkipLast 1) -join "/")/"
+                            }
+                        },
+                        @{n = "FileName"; e = { $_.Name } },
+                        @{n = "FileType"; e = { ($_.Name.ToString().Split('.'))[-1] } },
+                        @{n = "SizeKB"; e = { $([math]::Round(($_.Length / 1KB), 2)) } },
+                        TimeCreated, TimeLastModified
+
+                        if ($ReturnResult) {
+                            $output
+                        }
+
+                        if ($OutputFile) {
+                            $output | Export-Csv -NoTypeInformation -Append $OutputFile
+                        }
                     }
-                    else {
-                        'User'
-                    }
-                )
-
-                $output = $searchResult | Select-Object SiteUrl, SiteName, SiteType, OwnerName, OwnerEmail, OwnerType, @{
-                    n = "ParentPath"; e = {
-                        "/$((($_.ServerRelativeUrl -split '/') | Select-Object -Skip 3 | Select-Object -SkipLast 1) -join "/")/"
-                    }
-                },
-                @{n = "FileName"; e = { $_.Name } },
-                @{n = "FileType"; e = { ($_.Name.ToString().Split('.'))[-1] } },
-                @{n = "SizeKB"; e = { $([math]::Round(($_.Length / 1KB), 2)) } },
-                TimeCreated, TimeLastModified
-
-                if ($ReturnResult) {
-                    $output
-                }
-
-                if ($OutputFile) {
-                    $output | Export-Csv -NoTypeInformation -Append $OutputFile
                 }
             }
         }
