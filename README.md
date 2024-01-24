@@ -18,10 +18,19 @@ Administrators may be asked to search SharePoint and OneDrive sites for various 
   - [Example 2: Find Files from a Site using App-Only Authentication with Certificate](#example-2-find-files-from-a-site-using-app-only-authentication-with-certificate)
   - [Example 3: Find Files from All SharePoint Sites Only and Write the Results to a Custom CSV File Path](#example-3-find-files-from-all-sharepoint-sites-only-and-write-the-results-to-a-custom-csv-file-path)
   - [Example 4: Find Files from All OneDrive Sites Only](#example-4-find-files-from-all-onedrive-sites-only)
+  - [Example 5: Find Files from a SharePoint Site using Interactive Authentication](#example-5-find-files-from-a-sharepoint-site-using-interactive-authentication)
 - [Appendix](#appendix)
   - [Register an Azure AD App using the Register-PnPAzureADApp Cmdlet for App-Only Authentication](#register-an-azure-ad-app-using-the-register-pnpazureadapp-cmdlet-for-app-only-authentication)
     - [New App + New Self-Signed Certificate](#new-app--new-self-signed-certificate)
 - [Q\&A](#qa)
+  - [Does the script allow use of MFA-enabled administrator accounts?](#does-the-script-allow-use-of-mfa-enabled-administrator-accounts)
+  - [Why does the script need to authenticate to each site before doing a search?](#why-does-the-script-need-to-authenticate-to-each-site-before-doing-a-search)
+  - [Can I export the search results to a CSV file?](#can-i-export-the-search-results-to-a-csv-file)
+  - [If I do not use the `-ReturnResult` switch, how can I see the search results?](#if-i-do-not-use-the--returnresult-switch-how-can-i-see-the-search-results)
+  - [Does the script also search the default SharePoint Tenant URLs?](#does-the-script-also-search-the-default-sharepoint-tenant-urls)
+  - [Does the script also search the default system libraries?](#does-the-script-also-search-the-default-system-libraries)
+  - [What happens if the administrator account doesn't have site administrator or owner access to the site?](#what-happens-if-the-administrator-account-doesnt-have-site-administrator-or-owner-access-to-the-site)
+  - [I want to use app-only authentication but I don't have the Global Administrator role to grant application permissions required?](#i-want-to-use-app-only-authentication-but-i-dont-have-the-global-administrator-role-to-grant-application-permissions-required)
 
 ## Other alternatives exists?
 
@@ -137,6 +146,12 @@ The public key certificate thumbprint associated with the Azure AD app registrat
 
 The corresponding private certificate must be present in your personal certificate store `[cert:\CurrentUser\My\<thumbprint>]` for this to work.
 
+**`-Interactive [<SwitchParameter>]`**
+
+Switch to trigger interactive login.
+
+Note that this switch will prompt you to log in to each site to search and is not recommended for bulk site searches.
+
 **`-SearchString <String[]>`**
 
 One of more specific file name or pattern to search. For example, `"*.pdf","filename.ext","file*.00*"`
@@ -246,6 +261,16 @@ $splat = @{
 $results = .\Find-FileInSite.ps1 @splat
 ```
 
+### Example 5: Find Files from a SharePoint Site using Interactive Authentication
+
+This example prompts you to interactively log in to the SharePoint site.
+
+```powershell
+.\Find-FileInSite.ps1 -Interactive -SiteURL https://poshlab1.sharepoint.com/sites/ITOps -SearchString *.docx,*.xml
+```
+
+![Interactive login](docs/images/interactive_login.png)
+
 ## Appendix
 
 ### Register an Azure AD App using the Register-PnPAzureADApp Cmdlet for App-Only Authentication
@@ -306,40 +331,58 @@ Get-PnPTenantInstance
 
 ## Q&A
 
-**Question: Can I export the search results to a CSV file?**
+### Does the script allow use of MFA-enabled administrator accounts?
+
+> *Yes, when used with the `-Interactive` switch. But it is only recommended if you're searching one or a few sites at a time.*
+>
+> *If you plan to search multiple sites unattended, consider using a non-MFA account or register a new Azure AD app to use app-only authentication.*
+>
+> *Refer to Appendix: [Register an Azure AD App using the Register-PnPAzureADApp Cmdlet for App-Only Authentication](#register-an-azure-ad-app-using-the-register-pnpazureadapp-cmdlet-for-app-only-authentication)*
+
+### Why does the script need to authenticate to each site before doing a search?
+
+> *This is by design. Before you can access a site, you must have access to the site. And to prove you have access, you must first log in.*
+
+### Can I export the search results to a CSV file?
+
 > *Yes. Use the `-ReturnResults` switch and pipe to the `Export-Csv` cmdlet.*
 >
 > *The script automatically creates a CSV file containing the search results. The default location is under the `.\search\` subfolder.*
 >
 >*You can also specify a custom CSV file to use with the `-OutputFile <filepath>` parameter.*
 
-**Question: If I do not use the `-ReturnResult` switch, how can I see the search results?**
+### If I do not use the `-ReturnResult` switch, how can I see the search results?
+
 > *The script automatically creates a CSV file containing the search results. The default location is under the `.\search\` subfolder.*
 >
 > *You can also specify a custom CSV file to use with the `-OutputFile <filepath>` parameter.*
 
-**Question: Does the script also search the default SharePoint Tenant URLs?**
+### Does the script also search the default SharePoint Tenant URLs?
+
 > *No, it doesn't. The script deliberately ignores the tenant URLs such as the following.*
 >
 > ```text
-> MySiteHostUrl  : https://*-my.sharepoint.com/
-> PortalUrl      : https://*.sharepoint.com/
-> RootSiteUrl    : https://*.sharepoint.com/
-> TenantAdminUrl : https://*-admin.sharepoint.com/
+> OnDrive Host Url : https://*-my.sharepoint.com/
+> Portal Url       : https://*.sharepoint.com/
+> Tenant Admin Url : https://*-admin.sharepoint.com/
 > ```
 >
-> It also ignores the URLs matching these patterns:
+> *It also ignores the URLs matching these patterns:*
 >
-> `".*-my\.sharepoint\.com/$|.*\.sharepoint\.com/$|.*\.sharepoint\.com/search$|.*\.sharepoint\.com/portals/hub$|.*\.sharepoint\.com/sites/appcatalog$"`
+> *`".*-my\.sharepoint\.com/$|.*\.sharepoint\.com/$|.*\.sharepoint\.com/search$|.*\.sharepoint\.com/portals/hub$|.*\.sharepoint\.com/sites/appcatalog$"`*
 
-**Question: Does the script also search the default system libraries?**
-> *No, it doesn't search the default system libraries such as the following:
-> `'Form Templates', 'Pages', 'Preservation Hold Library', 'Site Assets', 'Site Pages', 'Images', 'Site Collection Documents', 'Site Collection Images', 'Style Library'`*
+### Does the script also search the default system libraries?
 
-**Question: What happens if the administrator account doesn't have site administrator or owner access to the site?**
+> *No, it doesn't search the default system libraries, such as the following:*
+>
+> *`'Form Templates', 'Pages', 'Preservation Hold Library', 'Site Assets', 'Site Pages', 'Images', 'Site Collection Documents', 'Site Collection Images', 'Style Library'`*
+
+### What happens if the administrator account doesn't have site administrator or owner access to the site?
+
 > *The search operation will fail with an `unauthorized` error. This is why it is recommended to use App-Only authentication instead of an administrator credential.*
 >
 > *Refer to Appendix: [Register an Azure AD App using the Register-PnPAzureADApp Cmdlet for App-Only Authentication](#register-an-azure-ad-app-using-the-register-pnpazureadapp-cmdlet-for-app-only-authentication)*
 
-**Question: I want to use app-only authentication but I don't have the Global Administrator role to grant application permissions required?**
-> Register the Azure AD application (if you have the right role) and ask your Global Administrator to grant the consent separately.
+### I want to use app-only authentication but I don't have the Global Administrator role to grant application permissions required?
+
+> *Register the Azure AD application (if you have the correct role) and ask your Global Administrator to grant the consent separately.*
