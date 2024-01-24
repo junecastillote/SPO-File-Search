@@ -12,6 +12,7 @@ Administrators may be asked to search SharePoint and OneDrive sites for various 
 - [Syntax](#syntax)
   - [Using an Administrator Credential](#using-an-administrator-credential)
   - [Using App-Only Authentication](#using-app-only-authentication)
+  - [Using Intreactive Authentication](#using-intreactive-authentication)
 - [Parameters](#parameters)
 - [Script Usage Examples](#script-usage-examples)
   - [Example 1: Find Files from a Site using Admin Credentials](#example-1-find-files-from-a-site-using-admin-credentials)
@@ -58,9 +59,9 @@ This script connects to each specified site, gets the existing files recursively
 
 #### OPTION 1: Administrator Credential
 
-- A non-MFA credential with a SharePoint Admin role and has full access to all SharePoint and OneDrive sites.
+- A SharePoint Admin account with full access to all SharePoint and OneDrive sites.
 
-> **Note**: An alternative is to create a [*Trusted Location-Based Conditional Access Policy*] that bypasses the MFA requirement of the administrator account.
+> **Note**: If the account is MFA-enabled, use the `-Interactive` switch to prompt for login.
 
 #### OPTION 2: App-Only Credential with Certificate (Recommended)
 
@@ -101,6 +102,21 @@ This script connects to each specified site, gets the existing files recursively
 ```
 
 ![Using App-Only Authentication](docs/images/param_set_2.png)
+
+### Using Intreactive Authentication
+
+```powershell
+.\Find-FileInSite.ps1
+    [-SiteURL] <String[]>
+    -SearchString <String[]>
+    [-Interactive]
+    [-ReturnResult]
+    [-OutputFile <String>]
+    [-Quiet]
+    [<CommonParameters>]
+```
+
+![Using App-Only Authentication](docs/images/param_set_3.png)
 
 ## Parameters
 
