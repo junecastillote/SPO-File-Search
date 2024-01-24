@@ -368,7 +368,7 @@ Get-PnPTenantInstance
 
 ### Can I export the search results to a CSV file?
 
-> *Yes. Use the `-ReturnResults` switch and pipe to the `Export-Csv` cmdlet.*
+> *Yes. Use the `-ReturnResult` switch and pipe to the `Export-Csv` cmdlet.*
 >
 > *The script automatically creates a CSV file containing the search results. The default location is under the `.\search\` subfolder.*
 >
