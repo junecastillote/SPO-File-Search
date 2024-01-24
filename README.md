@@ -334,8 +334,7 @@ Get-PnPTenantInstance
 
 **Question: Does the script also search the default system libraries?**
 > *No, it doesn't search the default system libraries such as the following:
-> `'Form Templates', 'Pages', 'Preservation Hold Library', 'Site Assets', 'Site Pages', 'Images',
-        'Site Collection Documents', 'Site Collection Images', 'Style Library'`*
+> `'Form Templates', 'Pages', 'Preservation Hold Library', 'Site Assets', 'Site Pages', 'Images', 'Site Collection Documents', 'Site Collection Images', 'Style Library'`*
 
 **Question: What happens if the administrator account doesn't have site administrator or owner access to the site?**
 > *The search operation will fail with an `unauthorized` error. This is why it is recommended to use App-Only authentication instead of an administrator credential.*
